@@ -7,7 +7,7 @@ const { authenticateToken } = require("../middleware/auth.middleware");
 router.get("/customers", authenticateToken, async (req, res) => {
   try {
     const [rows] = await db.query(
-      "SELECT * FROM CUSTOMER WHERE CISACTIVE = 1 ORDER BY CCOMPANY, CNAME"
+      "SELECT * FROM customer WHERE cisactive = 1 ORDER BY CCOMPANY, CNAME"
     );
     res.json(rows);
   } catch (err) {
@@ -38,14 +38,14 @@ router.post("/customers", authenticateToken, async (req, res) => {
 
   try {
     const [result] = await db.query(
-      `INSERT INTO CUSTOMER 
+      `INSERT INTO customer 
       (CCOMPANY, CNAME, CEMAIL, CNUMBER, CSTREET, CCITY, CPOSTALCODE, CPROVINCE, CISACTIVE)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
       [CCOMPANY, CNAME, CEMAIL, CNUMBER, CSTREET, CCITY, CPOSTALCODE, CPROVINCE]
     );
 
     const [customerRows] = await db.query(
-      "SELECT * FROM CUSTOMER WHERE CID = ?", [result.insertId]
+      "SELECT * FROM customer WHERE CID = ?", [result.insertId]
     );
 
     res.json(customerRows[0]);

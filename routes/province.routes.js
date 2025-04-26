@@ -23,7 +23,7 @@ const { authenticateToken } = require("../middleware/auth.middleware");
 router.get("/provinces", authenticateToken, async (req, res) => {
   try {
     const [result] = await db.query(
-      "SELECT * FROM PROVINCE ORDER BY PNAME"
+      "SELECT * FROM province ORDER BY PNAME"
     );
     res.json(result);
   } catch (err) {

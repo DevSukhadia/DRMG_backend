@@ -97,7 +97,7 @@ router.post("/orders", authenticateToken, async (req, res) => {
   const { CId, ODate, rows } = req.body;
   try {
     const [orderResult] = await db.query(
-      "INSERT INTO ORDERS (CID, ODATE) VALUES (?, ?)",
+      "INSERT INTO orders (CID, ODATE) VALUES (?, ?)",
       [CId, ODate]
     );
     const OId = orderResult.insertId;
@@ -112,7 +112,7 @@ router.post("/orders", authenticateToken, async (req, res) => {
       row.Rate
     ]);
     await db.query(
-      `INSERT INTO ORDER_ROW (OID, MONTH, PRODUCTTYPE, ADSIZE, DELIVERYTYPE, QTY, RATE) VALUES ?`,
+      `INSERT INTO order_row (OID, MONTH, PRODUCTTYPE, ADSIZE, DELIVERYTYPE, QTY, RATE) VALUES ?`,
       [orderRowsData]
     );
 
@@ -127,8 +127,8 @@ router.post("/orders", authenticateToken, async (req, res) => {
 router.put("/orders/:orderId", authenticateToken, async (req, res) => {
   const { OId, CId, ODate, rows } = req.body;
   try {
-    await db.query("UPDATE ORDERS SET CID = ?, ODATE = ? WHERE OID = ?", [CId, ODate, OId]);
-    await db.query("DELETE FROM ORDER_ROW WHERE OID = ?", [OId]);
+    await db.query("UPDATE orders SET CID = ?, ODATE = ? WHERE OID = ?", [CId, ODate, OId]);
+    await db.query("DELETE FROM order_row WHERE OID = ?", [OId]);
 
     const orderRowsData = rows.map(row => [
       OId,
@@ -140,7 +140,7 @@ router.put("/orders/:orderId", authenticateToken, async (req, res) => {
       row.Rate
     ]);
     await db.query(
-      `INSERT INTO ORDER_ROW (OID, MONTH, PRODUCTTYPE, ADSIZE, DELIVERYTYPE, QTY, RATE) VALUES ?`,
+      `INSERT INTO order_row (OID, MONTH, PRODUCTTYPE, ADSIZE, DELIVERYTYPE, QTY, RATE) VALUES ?`,
       [orderRowsData]
     );
 
@@ -157,15 +157,15 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
   try {
     const [orderResults] = await db.query(
       `SELECT o.*, c.CNAME, c.CSTREET, c.CCITY, c.CPROVINCE, c.CPOSTALCODE, c.CEMAIL, c.CNUMBER, c.CCOMPANY
-       FROM ORDERS o
-       JOIN CUSTOMER c ON o.CID = c.CID
+       FROM order o
+       JOIN customer c ON o.CID = c.CID
        WHERE o.OID = ?`,
       [orderId]
     );
     if (!orderResults.length) return res.status(404).json({ error: "Order not found" });
 
     const [rowResults] = await db.query(
-      "SELECT * FROM ORDER_ROW WHERE OID = ?", [orderId]
+      "SELECT * FROM order_row WHERE OID = ?", [orderId]
     );
 
     res.json({
