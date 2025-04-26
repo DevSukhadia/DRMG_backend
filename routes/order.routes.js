@@ -157,7 +157,7 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
   try {
     const [orderResults] = await db.query(
       `SELECT o.*, c.CNAME, c.CSTREET, c.CCITY, c.CPROVINCE, c.CPOSTALCODE, c.CEMAIL, c.CNUMBER, c.CCOMPANY
-       FROM \`order\` o
+       FROM \`orders\` o
        JOIN customer c ON o.CID = c.CID
        WHERE o.OID = ?`,
       [orderId]
