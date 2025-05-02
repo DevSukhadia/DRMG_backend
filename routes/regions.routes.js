@@ -1,10 +1,14 @@
-const router = require("./order.routes");
+// routes/regions.js
+const express = require("express");
+const router = express.Router();
+const db = require("../config/db");
 
-router.get('/regions-ms', (req, res) => {
-    db.query('SELECT * FROM REGIONS_MS WHERE ISACTIVE = 1', (err, results) => {
-      if (err) return res.status(500).json({ error: err });
-      res.json(results);
-    });
+router.get("/regions-ms", (req, res) => {
+  const sql = "SELECT REGION, QUANTITY FROM REGIONS_MS WHERE ISACTIVE = 1";
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json(results);
   });
-  
-  module.exports = router;
+});
+
+module.exports = router;
