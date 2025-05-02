@@ -7,3 +7,4 @@ router.get('/regions-ms', (req, res) => {
     });
   });
   
+  module.exports = router;
