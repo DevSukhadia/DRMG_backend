@@ -120,7 +120,7 @@ router.get("/orders", authenticateToken, (req, res) => {
     ? `SELECT o.OID, o.CID, o.userId, u.username AS createdBy, c.CCOMPANY 
        FROM orders o 
        JOIN customer c ON o.CID = c.CID 
-       JOIN users u ON o.userId = u.id`
+       JOIN users u ON o.userId = ?`
     : `SELECT o.OID, o.CID, o.userId, c.CCOMPANY 
        FROM orders o 
        JOIN customer c ON o.CID = c.CID 
