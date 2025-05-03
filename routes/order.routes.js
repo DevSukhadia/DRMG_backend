@@ -53,7 +53,6 @@ router.post("/orders", authenticateToken, async (req, res) => {
   }
 });
 
-
 // Update Order
 router.put("/orders/:orderId", authenticateToken, async (req, res) => {
   const { OId, CId, ODate, rows } = req.body;
@@ -81,34 +80,6 @@ router.put("/orders/:orderId", authenticateToken, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-// Get order by id (+ customer info)
-// router.get("/orders/:orderId", authenticateToken, async (req, res) => {
-//   const orderId = req.params.orderId;
-//   try {
-//     const [orderResults] = await db.query(
-//       `SELECT o.*, c.CNAME, c.CSTREET, c.CCITY, c.CPROVINCE, c.CPOSTALCODE, c.CEMAIL, c.CNUMBER, c.CCOMPANY
-//        FROM \`orders\` o
-//        JOIN customer c ON o.CID = c.CID
-//        WHERE o.OID = ?`,
-//       [orderId]
-//     );
-    
-//     if (!orderResults.length) return res.status(404).json({ error: "Order not found" });
-
-//     const [rowResults] = await db.query(
-//       "SELECT * FROM order_row WHERE OID = ?", [orderId]
-//     );
-
-//     res.json({
-//       order: orderResults[0],
-//       rows: rowResults
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ error: err.message });
-//   }
-// });
 
 router.get("/orders/:id", async (req, res) => {
   const orderId = req.params.id;
@@ -141,5 +112,26 @@ router.get("/orders/:id", async (req, res) => {
   }
 });
 
+// Fetch orders based on role
+router.get("/orders", authenticateToken, (req, res) => {
+  const user = req.user;
+
+  const query = user.role === "admin"
+    ? `SELECT o.OID, o.CID, o.userId, u.username AS createdBy, c.CCOMPANY 
+       FROM orders o 
+       JOIN customer c ON o.CID = c.CID 
+       JOIN users u ON o.userId = u.id`
+    : `SELECT o.OID, o.CID, o.userId, c.CCOMPANY 
+       FROM orders o 
+       JOIN customer c ON o.CID = c.CID 
+       WHERE o.userId = ?`;
+
+  const params = user.role === "admin" ? [] : [user.id];
+
+  db.query(query, params, (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+});
 
 module.exports = router;
