@@ -128,7 +128,11 @@ router.get("/orders", authenticateToken, (req, res) => {
        WHERE o.USERID = ?
        ORDER BY o.ODATE DESC`;
 
+  console.log("Query:", query); // 👈 Log the query
+
   const params = user.role === "admin" ? [] : [user.id];
+
+  console.log("Params:", params); // 👈 Log the parameters
 
   db.query(query, params, (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
