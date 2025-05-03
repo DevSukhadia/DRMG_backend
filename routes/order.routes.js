@@ -112,9 +112,9 @@ router.get("/orders/:id", async (req, res) => {
   }
 });
 
-// Fetch orders based on role
 router.get("/orders", authenticateToken, (req, res) => {
   const user = req.user;
+  console.log("Fetching orders for user:", user); // 👈 Add this line
 
   const query = user.role === "admin"
     ? `SELECT o.OID, o.CID, o.USERID, o.ODATE, u.username AS createdBy, c.CCOMPANY 
@@ -132,8 +132,10 @@ router.get("/orders", authenticateToken, (req, res) => {
 
   db.query(query, params, (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
+    console.log("Orders fetched:", results); // 👈 Log the output
     res.json(results);
   });
 });
+
 
 module.exports = router;
