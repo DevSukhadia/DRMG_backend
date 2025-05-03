@@ -117,14 +117,16 @@ router.get("/orders", authenticateToken, (req, res) => {
   const user = req.user;
 
   const query = user.role === "admin"
-    ? `SELECT o.OID, o.CID, o.userId, u.username AS createdBy, c.CCOMPANY 
+    ? `SELECT o.OID, o.CID, o.USERID, o.ODATE, u.username AS createdBy, c.CCOMPANY 
        FROM orders o 
        JOIN customer c ON o.CID = c.CID 
-       JOIN users u ON o.userId = ?`
-    : `SELECT o.OID, o.CID, o.userId, c.CCOMPANY 
+       JOIN users u ON o.USERID = u.id
+       ORDER BY o.ODATE DESC`
+    : `SELECT o.OID, o.CID, o.USERID, o.ODATE, c.CCOMPANY 
        FROM orders o 
        JOIN customer c ON o.CID = c.CID 
-       WHERE o.userId = ?`;
+       WHERE o.USERID = ?
+       ORDER BY o.ODATE DESC`;
 
   const params = user.role === "admin" ? [] : [user.id];
 
