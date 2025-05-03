@@ -122,7 +122,7 @@ router.get("/orders/:id", async (req, res) => {
     const [rows] = await db.query("SELECT * FROM order_row WHERE OID = ?", [orderId]);
 
     const [regionRows] = await db.query(
-      "SELECT MONTH, REGION FROM order_region WHERE OID = ?",
+      "SELECT MONTH, REGION FROM ORDER_REGIONS WHERE OID = ?",
       [orderId]
     );
 
