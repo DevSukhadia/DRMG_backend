@@ -62,6 +62,6 @@ exports.deactivateUser = async (req, res) => {
 };
 
 exports.getProfile = async (req, res) => {
-  const [user] = await db.execute("SELECT id, role FROM users WHERE id = ?", [req.user.id]);
+  const [user] = await db.execute("SELECT id, role, username FROM users WHERE id = ?", [req.user.id]);
   res.json({ user: user[0] });
 };
