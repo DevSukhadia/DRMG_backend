@@ -71,7 +71,7 @@ router.post("/orders", authenticateToken, async (req, res) => {
 
     if (orderRegionsData.length > 0) {
       await db.query(
-        `INSERT INTO order_regions (OID, MONTH, REGION) VALUES ?`,
+        `INSERT INTO ORDER_REGIONS (OID, MONTH, REGION) VALUES ?`,
         [orderRegionsData]
       );
     }
