@@ -82,37 +82,6 @@ router.put("/orders/:orderId", authenticateToken, async (req, res) => {
   }
 });
 
-// router.get("/orders/:id", async (req, res) => {
-//   const orderId = req.params.id;
-
-//   try {
-//     const [[order]] = await db.query(
-//       "SELECT * FROM orders o JOIN customer c ON o.CID = c.CID WHERE OID = ?",
-//       [orderId]
-//     );
-
-//     const [rows] = await db.query("SELECT * FROM order_row WHERE OID = ?", [orderId]);
-
-//     const [regionRows] = await db.query(
-//       "SELECT MONTH, REGION FROM ORDER_REGIONS WHERE OID = ?",
-//       [orderId]
-//     );
-
-//     // Convert to format: Array(14).fill([]), with each index holding an array of regions
-//     const months = rows.map(r => r.MONTH);
-//     const regionSelections = months.map(month =>
-//       regionRows
-//         .filter(r => r.MONTH === month)
-//         .map(r => r.REGION)
-//     );
-
-//     res.json({ order, rows, regionSelections });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
 // Fetch single order with region selections if MONEY SAVER
 router.get("/orders/:orderId", authenticateToken, async (req, res) => {
   const orderId = req.params.orderId;
@@ -150,7 +119,7 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
     }
   
     const rows = rowResult.map(row => {
-      if (row.PRODUCTTYPE === "MONEY SAVER") {
+      if (row.PRODUCTTYPE === "MONEY SAVER" && row.DELIVERYTYPE === "Print Only") {
         row.DELIVERYTYPE = regionMap[row.MONTH] || "";
       }
       return row;
