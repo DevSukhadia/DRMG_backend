@@ -56,7 +56,7 @@ router.post("/orders", authenticateToken, async (req, res) => {
 
 // Update Order
 router.put("/orders/:orderId", authenticateToken, async (req, res) => {
-  const { OId, CId, ODate, rows } = req.body;
+  const { OId, CId, ODate, rows, months, regionSelections } = req.body;
   try {
     await db.query("UPDATE orders SET CID = ?, ODATE = ? WHERE OID = ?", [CId, ODate, OId]);
     await db.query("DELETE FROM order_row WHERE OID = ?", [OId]);
@@ -74,6 +74,24 @@ router.put("/orders/:orderId", authenticateToken, async (req, res) => {
       `INSERT INTO order_row (OID, MONTH, PRODUCTTYPE, ADSIZE, DELIVERYTYPE, QTY, RATE) VALUES ?`,
       [orderRowsData]
     );
+
+    // Insert into order_regions
+    const orderRegionsData = [];
+    regionSelections.forEach((regionList, idx) => {
+      const monthLabel = months[idx];
+      regionList.forEach(regionName => {
+        orderRegionsData.push([OId, monthLabel, regionName]);
+      });
+    });
+
+    await db.query("DELETE FROM ORDER_REGIONS WHERE OID = ?", [OId]);
+
+    if (orderRegionsData.length > 0) {
+      await db.query(
+        `INSERT INTO ORDER_REGIONS (OID, MONTH, REGION) VALUES ?`,
+        [orderRegionsData]
+      );
+    }
 
     res.json({ message: "Order updated!" });
   } catch (err) {
