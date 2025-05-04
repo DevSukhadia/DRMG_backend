@@ -114,7 +114,7 @@ router.put("/orders/:orderId", authenticateToken, async (req, res) => {
 // });
 
 // Fetch single order with region selections if MONEY SAVER
-router.get("/orders/:orderId", authenticateToken, (req, res) => {
+router.get("/orders/:orderId", authenticateToken, async (req, res) => {
   const orderId = req.params.orderId;
 
   console.log("Fetching order with ID:", orderId); // 👈 Log the orderId
@@ -134,40 +134,71 @@ router.get("/orders/:orderId", authenticateToken, (req, res) => {
     WHERE r.OID = ? 
     GROUP BY r.MONTH`;
 
-  db.query(orderQuery, [orderId], (err, orderResults) => {
-    if (err) return res.status(500).json({ error: err.message });
-    const order = orderResults[0];
-
+  try {
+    const [orderResult] = await db.query(orderQuery, [orderId], (err, orderResults));
     console.log("Fetched order:", order); // 👈 Log the fetched order
 
-    db.query(rowsQuery, [orderId], (err, rowResults) => {
-      if (err) return res.status(500).json({ error: err.message });
+    const [rowResult] = await db.query(rowsQuery, [orderId], (err, rowResults));
+    console.log("Fetched rows:", rowResults); // 👈 Log the fetched rows
 
-      console.log("Fetched rows:", rowResults); // 👈 Log the fetched rows
-
-      db.query(regionsQuery, [orderId], (err, regionResults) => {
-        if (err) return res.status(500).json({ error: err.message });
-
-        console
-
-        const regionMap = {};
-        for (const row of regionResults) {
-          regionMap[row.MONTH] = row.REGIONS;
-        }
-
-        const rows = rowResults.map(row => {
-          if (row.PRODUCTTYPE === "MONEY SAVER") {
-            row.DELIVERYTYPE = regionMap[row.MONTH] || "";
-          }
-          return row;
-        });
-
-        console.log("rows with regions:", rows); // 👈 Log the rows with regions
-
-        res.json({ order, rows });
-      });
+    const [regionResult] = await db.query(regionsQuery, [orderId], (err, regionResults));
+    console.log("Fetched regions:", regionResults); // 👈 Log the fetched regions
+    
+    const regionMap = {};
+    for (const row of regionResults) {
+      regionMap[row.MONTH] = row.REGIONS;
+    }
+  
+    const rows = rowResults.map(row => {
+      if (row.PRODUCTTYPE === "MONEY SAVER") {
+        row.DELIVERYTYPE = regionMap[row.MONTH] || "";
+      }
+      return row;
     });
-  });
+  
+    console.log("rows with regions:", rows); // 👈 Log the rows with regions
+  
+    res.json({ order, rows });
+
+    // db.query(orderQuery, [orderId], (err, orderResults) => {
+    //   if (err) return res.status(500).json({ error: err.message });
+    //   const order = orderResults[0];
+  
+    //   console.log("Fetched order:", order); // 👈 Log the fetched order
+  
+    //   db.query(rowsQuery, [orderId], (err, rowResults) => {
+    //     if (err) return res.status(500).json({ error: err.message });
+  
+    //     console.log("Fetched rows:", rowResults); // 👈 Log the fetched rows
+  
+    //     db.query(regionsQuery, [orderId], (err, regionResults) => {
+    //       if (err) return res.status(500).json({ error: err.message });
+  
+    //       const regionMap = {};
+    //       for (const row of regionResults) {
+    //         regionMap[row.MONTH] = row.REGIONS;
+    //       }
+  
+    //       const rows = rowResults.map(row => {
+    //         if (row.PRODUCTTYPE === "MONEY SAVER") {
+    //           row.DELIVERYTYPE = regionMap[row.MONTH] || "";
+    //         }
+    //         return row;
+    //       });
+  
+    //       console.log("rows with regions:", rows); // 👈 Log the rows with regions
+  
+    //       res.json({ order, rows });
+    //     });
+    //   });
+    // });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+
+  
 });
 
 router.get("/orders", authenticateToken, async (req, res) => {
