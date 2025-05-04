@@ -9,7 +9,7 @@ router.post("/orders", authenticateToken, async (req, res) => {
   try {
     // Insert into orders
     const [orderResult] = await db.query(
-      "INSERT INTO orders (CID, ODATE, USERID) VALUES (?, ?)",
+      "INSERT INTO orders (CID, ODATE, USERID) VALUES (?, ?, ?)",
       [CId, ODate, req.user.id]
     );
     const OId = orderResult.insertId;
