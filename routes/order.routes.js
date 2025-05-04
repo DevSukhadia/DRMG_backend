@@ -138,11 +138,17 @@ router.get("/orders/:orderId", authenticateToken, (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     const order = orderResults[0];
 
+    console.log("Fetched order:", order); // 👈 Log the fetched order
+
     db.query(rowsQuery, [orderId], (err, rowResults) => {
       if (err) return res.status(500).json({ error: err.message });
 
+      console.log("Fetched rows:", rowResults); // 👈 Log the fetched rows
+
       db.query(regionsQuery, [orderId], (err, regionResults) => {
         if (err) return res.status(500).json({ error: err.message });
+
+        console
 
         const regionMap = {};
         for (const row of regionResults) {
@@ -155,6 +161,8 @@ router.get("/orders/:orderId", authenticateToken, (req, res) => {
           }
           return row;
         });
+
+        console.log("rows with regions:", rows); // 👈 Log the rows with regions
 
         res.json({ order, rows });
       });
