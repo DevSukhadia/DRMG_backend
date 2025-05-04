@@ -117,6 +117,8 @@ router.put("/orders/:orderId", authenticateToken, async (req, res) => {
 router.get("/orders/:orderId", authenticateToken, (req, res) => {
   const orderId = req.params;
 
+  console.log("Fetching order with ID:", orderId); // 👈 Log the orderId
+
   const orderQuery = `
     SELECT o.*, c.* 
     FROM orders o 
