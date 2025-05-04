@@ -81,40 +81,86 @@ router.put("/orders/:orderId", authenticateToken, async (req, res) => {
   }
 });
 
-router.get("/orders/:id", async (req, res) => {
+// router.get("/orders/:id", async (req, res) => {
+//   const orderId = req.params.id;
+
+//   try {
+//     const [[order]] = await db.query(
+//       "SELECT * FROM orders o JOIN customer c ON o.CID = c.CID WHERE OID = ?",
+//       [orderId]
+//     );
+
+//     const [rows] = await db.query("SELECT * FROM order_row WHERE OID = ?", [orderId]);
+
+//     const [regionRows] = await db.query(
+//       "SELECT MONTH, REGION FROM ORDER_REGIONS WHERE OID = ?",
+//       [orderId]
+//     );
+
+//     // Convert to format: Array(14).fill([]), with each index holding an array of regions
+//     const months = rows.map(r => r.MONTH);
+//     const regionSelections = months.map(month =>
+//       regionRows
+//         .filter(r => r.MONTH === month)
+//         .map(r => r.REGION)
+//     );
+
+//     res.json({ order, rows, regionSelections });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: err.message });
+//   }
+// });
+
+// Fetch single order with region selections if MONEY SAVER
+router.get("/orders/:id", authenticateToken, (req, res) => {
   const orderId = req.params.id;
 
-  try {
-    const [[order]] = await db.query(
-      "SELECT * FROM orders o JOIN customer c ON o.CID = c.CID WHERE OID = ?",
-      [orderId]
-    );
+  const orderQuery = `
+    SELECT o.*, c.* 
+    FROM orders o 
+    JOIN customer c ON o.CID = c.CID 
+    WHERE o.OID = ?`;
 
-    const [rows] = await db.query("SELECT * FROM order_row WHERE OID = ?", [orderId]);
+  const rowsQuery = `
+    SELECT * FROM order_rows WHERE OID = ? ORDER BY MONTH_INDEX ASC`;
 
-    const [regionRows] = await db.query(
-      "SELECT MONTH, REGION FROM ORDER_REGIONS WHERE OID = ?",
-      [orderId]
-    );
+  const regionsQuery = `
+    SELECT r.MONTH, GROUP_CONCAT(r.REGION) AS REGIONS 
+    FROM region_selections r 
+    WHERE r.OID = ? 
+    GROUP BY r.MONTH`;
 
-    // Convert to format: Array(14).fill([]), with each index holding an array of regions
-    const months = rows.map(r => r.MONTH);
-    const regionSelections = months.map(month =>
-      regionRows
-        .filter(r => r.MONTH === month)
-        .map(r => r.REGION)
-    );
+  db.query(orderQuery, [orderId], (err, orderResults) => {
+    if (err) return res.status(500).json({ error: err.message });
+    const order = orderResults[0];
 
-    res.json({ order, rows, regionSelections });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
+    db.query(rowsQuery, [orderId], (err, rowResults) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      db.query(regionsQuery, [orderId], (err, regionResults) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        const regionMap = {};
+        for (const row of regionResults) {
+          regionMap[row.MONTH] = row.REGIONS;
+        }
+
+        const rows = rowResults.map(row => {
+          if (row.PRODUCTTYPE === "MONEY SAVER") {
+            row.DELIVERYTYPE = regionMap[row.MONTH] || "";
+          }
+          return row;
+        });
+
+        res.json({ order, rows });
+      });
+    });
+  });
 });
 
 router.get("/orders", authenticateToken, async (req, res) => {
   const user = req.user;
-  console.log("Fetching orders for user:", user); // 👈 Add this line
 
   const query = user.role === "admin"
     ? `SELECT o.OID, o.CID, o.USERID, o.ODATE, u.username AS createdBy, c.CCOMPANY 
@@ -128,33 +174,16 @@ router.get("/orders", authenticateToken, async (req, res) => {
        WHERE o.USERID = ?
        ORDER BY o.ODATE DESC`;
 
-  console.log("Query:", query); // 👈 Log the query
-
   const params = user.role === "admin" ? [] : [user.id];
-
-  console.log("Params:", params); // 👈 Log the parameters
-
   try {
-    // const [rows] = await db.query(
-    //   "SELECT * FROM customer WHERE cisactive = 1 ORDER BY CCOMPANY, CNAME"
-    // );
-
     const [rows] = await db.query(query, params);
     console.log("Orders fetched:", rows); // 👈 Log the output
 
     res.json(rows);
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
-
-  // await db.query(query, params, (err, results) => {
-  //   if (err) return res.status(500).json({ error: err.message });
-  //   console.log("Orders fetched:", results); // 👈 Log the output
-  //   res.json(results);
-  // });
 });
-
 
 module.exports = router;
