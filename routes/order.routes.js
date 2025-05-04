@@ -46,7 +46,7 @@ router.post("/orders", authenticateToken, async (req, res) => {
     }
 
     // res.json({ OId, message: "Order, rows, and regions saved!" });
-    res.status(201).json({ OID: insertedOrderId });
+    res.status(201).json({ OId: OId });
 
   } catch (err) {
     console.error(err);
