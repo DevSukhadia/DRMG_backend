@@ -135,21 +135,21 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
     GROUP BY r.MONTH`;
 
   try {
-    const [orderResult] = await db.query(orderQuery, [orderId], (err, orderResults));
+    const [order] = await db.query(orderQuery, [orderId]);
     console.log("Fetched order:", order); // 👈 Log the fetched order
 
-    const [rowResult] = await db.query(rowsQuery, [orderId], (err, rowResults));
-    console.log("Fetched rows:", rowResults); // 👈 Log the fetched rows
+    const [rowResult] = await db.query(rowsQuery, [orderId]);
+    console.log("Fetched rows:", rowResult); // 👈 Log the fetched rows
 
-    const [regionResult] = await db.query(regionsQuery, [orderId], (err, regionResults));
-    console.log("Fetched regions:", regionResults); // 👈 Log the fetched regions
+    const [regionResult] = await db.query(regionsQuery, [orderId]);
+    console.log("Fetched regions:", regionResult); // 👈 Log the fetched regions
     
     const regionMap = {};
-    for (const row of regionResults) {
+    for (const row of regionResult) {
       regionMap[row.MONTH] = row.REGIONS;
     }
   
-    const rows = rowResults.map(row => {
+    const rows = rowResult.map(row => {
       if (row.PRODUCTTYPE === "MONEY SAVER") {
         row.DELIVERYTYPE = regionMap[row.MONTH] || "";
       }
@@ -159,40 +159,6 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
     console.log("rows with regions:", rows); // 👈 Log the rows with regions
   
     res.json({ order, rows });
-
-    // db.query(orderQuery, [orderId], (err, orderResults) => {
-    //   if (err) return res.status(500).json({ error: err.message });
-    //   const order = orderResults[0];
-  
-    //   console.log("Fetched order:", order); // 👈 Log the fetched order
-  
-    //   db.query(rowsQuery, [orderId], (err, rowResults) => {
-    //     if (err) return res.status(500).json({ error: err.message });
-  
-    //     console.log("Fetched rows:", rowResults); // 👈 Log the fetched rows
-  
-    //     db.query(regionsQuery, [orderId], (err, regionResults) => {
-    //       if (err) return res.status(500).json({ error: err.message });
-  
-    //       const regionMap = {};
-    //       for (const row of regionResults) {
-    //         regionMap[row.MONTH] = row.REGIONS;
-    //       }
-  
-    //       const rows = rowResults.map(row => {
-    //         if (row.PRODUCTTYPE === "MONEY SAVER") {
-    //           row.DELIVERYTYPE = regionMap[row.MONTH] || "";
-    //         }
-    //         return row;
-    //       });
-  
-    //       console.log("rows with regions:", rows); // 👈 Log the rows with regions
-  
-    //       res.json({ order, rows });
-    //     });
-    //   });
-    // });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
