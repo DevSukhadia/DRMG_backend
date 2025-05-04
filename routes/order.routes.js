@@ -122,13 +122,6 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
     for (const row of regionResult) {
       regionMap[row.MONTH] = row.REGIONS;
     }
-  
-    const months = rows.map(r => r.MONTH);
-    const regionSelections = months.map(month =>
-      regionRows
-        .filter(r => r.MONTH === month)
-        .map(r => r.REGION)
-    )
 
     const rows = rowResult.map(row => {
       if (row.PRODUCTTYPE === "MONEY SAVER" && row.DELIVERYTYPE === "Delivery") {
@@ -137,6 +130,13 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
       return row;
     });
   
+    const months = rows.map(r => r.MONTH);
+    const regionSelections = months.map(month =>
+      regionRows
+        .filter(r => r.MONTH === month)
+        .map(r => r.REGION)
+    )
+
     res.json({ order, rows, regionSelections });
   } catch (err) {
     console.error(err);
