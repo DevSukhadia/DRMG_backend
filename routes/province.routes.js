@@ -32,4 +32,21 @@ router.get("/provinces", authenticateToken, async (req, res) => {
   }
 });
 
+// Get tax percentage for a province
+router.get("/province-tax/:province", authenticateToken, (req, res) => {
+  const provinceName = req.params.province;
+
+  const query = `SELECT PTAX FROM province WHERE PNAME = ? LIMIT 1`;
+
+  db.query(query, [provinceName], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "Province not found" });
+    }
+
+    res.json({ tax: results[0].PTAX });
+  });
+});
+
 module.exports = router;
