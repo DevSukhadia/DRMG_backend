@@ -126,11 +126,11 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
     WHERE o.OID = ?`;
 
   const rowsQuery = `
-    SELECT * FROM order_rows WHERE OID = ? ORDER BY MONTH_INDEX ASC`;
+    SELECT * FROM order_row WHERE OID = ? ORDER BY ROWID ASC`;
 
   const regionsQuery = `
-    SELECT r.MONTH, GROUP_CONCAT(r.REGION) AS REGIONS 
-    FROM region_selections r 
+    SELECT r.MONTH, GROUP_CONCAT(r.REGION) AS REGIONS
+    FROM ORDER_REGIONS r 
     WHERE r.OID = ? 
     GROUP BY r.MONTH`;
 
