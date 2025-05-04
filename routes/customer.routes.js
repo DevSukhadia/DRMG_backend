@@ -4,8 +4,24 @@ const db = require("../config/db");
 const { authenticateToken } = require("../middleware/auth.middleware");
 
 // Get customer by ID
-router.get("/customers/:id", authenticateToken, (req, res) => {
+router.get("/customers/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
+
+  try {
+    const [result] = await db.query(
+      `SELECT c.*, p.PTAX 
+       FROM customer c 
+       LEFT JOIN province p ON c.CPROVINCE = p.PNAME 
+       WHERE c.CID = ?`,
+      [id]);
+    
+    if (results.length === 0) return res.status(404).json({ error: "Customer not found" });
+    res.json(results[0]);
+  } catch (error) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+
   db.query(
     `SELECT c.*, p.PTAX 
      FROM customer c 
