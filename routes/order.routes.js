@@ -103,27 +103,32 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
     WHERE r.OID = ? 
     GROUP BY r.MONTH`;
 
+    const regionRowsQuery = "SELECT MONTH, REGION FROM ORDER_REGIONS WHERE OID = ?";;
+
   try {
     const [order] = await db.query(orderQuery, [orderId]);
-    console.log("Fetched order:", order); // 👈 Log the fetched order
+    // console.log("Fetched order:", order); // 👈 Log the fetched order
 
     const [rowResult] = await db.query(rowsQuery, [orderId]);
-    console.log("Fetched rows:", rowResult); // 👈 Log the fetched rows
+    // console.log("Fetched rows:", rowResult); // 👈 Log the fetched rows
 
     const [regionResult] = await db.query(regionsQuery, [orderId]);
-    console.log("Fetched regions:", regionResult); // 👈 Log the fetched regions
+    // console.log("Fetched regions:", regionResult); // 👈 Log the fetched regions
+
+    const regionRows = await db.query(regionRowsQuery, [orderId]);
+    // console.log("Fetched region rows:", regionRows); // 👈 Log the fetched region rows
     
     const regionMap = {};
     for (const row of regionResult) {
       regionMap[row.MONTH] = row.REGIONS;
     }
   
-    const regionSelections = regionResult.reduce((acc, row) => {
-      const month = row.MONTH;
-      const regions = row.REGIONS.split(",").map(region => region.trim());
-      acc[month] = regions;
-      return acc;
-    }, {});
+    const months = rows.map(r => r.MONTH);
+    const regionSelections = months.map(month =>
+      regionRows
+        .filter(r => r.MONTH === month)
+        .map(r => r.REGION)
+    )
 
     const rows = rowResult.map(row => {
       if (row.PRODUCTTYPE === "MONEY SAVER" && row.DELIVERYTYPE === "Delivery") {
@@ -131,8 +136,6 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
       }
       return row;
     });
-  
-    console.log("rows with regions:", rows); // 👈 Log the rows with regions
   
     res.json({ order, rows, regionSelections });
   } catch (err) {
