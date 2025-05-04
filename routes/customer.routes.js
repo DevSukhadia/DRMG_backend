@@ -15,9 +15,9 @@ router.get("/customers/:id", authenticateToken, async (req, res) => {
        WHERE c.CID = ?`,
       [id]);
     
-    if (results.length === 0) return res.status(404).json({ error: "Customer not found" });
-    res.json(results[0]);
-  } catch (error) {
+    if (result.length === 0) return res.status(404).json({ error: "Customer not found" });
+    res.json(result[0]);
+  } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
