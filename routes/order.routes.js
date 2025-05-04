@@ -115,7 +115,7 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
     const [regionResult] = await db.query(regionsQuery, [orderId]);
     // console.log("Fetched regions:", regionResult); // 👈 Log the fetched regions
 
-    const regionRows = await db.query(regionRowsQuery, [orderId]);
+    const [regionRows] = await db.query(regionRowsQuery, [orderId]);
     // console.log("Fetched region rows:", regionRows); // 👈 Log the fetched region rows
     
     const regionMap = {};
@@ -131,13 +131,13 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
     });
   
     const months = rows.map(r => r.MONTH);
-    const regionSelections = months.map(month =>
-      regionRows
-        .filter(r => r.MONTH === month)
-        .map(r => r.REGION)
-    )
+    // const regionSelections = months.map(month =>
+    //   regionRows
+    //     .filter(r => r.MONTH === month)
+    //     .map(r => r.REGION)
+    // )
 
-    res.json({ order, rows, regionSelections });
+    res.json({ order, rows, regionRows });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
