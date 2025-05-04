@@ -4,13 +4,13 @@ const db = require("../config/db");
 const { authenticateToken } = require("../middleware/auth.middleware");
 
 router.post("/orders", authenticateToken, async (req, res) => {
-  const { CId, ODate, rows, regionSelections = [], months = [], userId } = req.body;
+  const { CId, ODate, rows, regionSelections = [], months = [] } = req.body;
 
   try {
     // Insert into orders
     const [orderResult] = await db.query(
       "INSERT INTO orders (CID, ODATE, USERID) VALUES (?, ?)",
-      [CId, ODate, userId]
+      [CId, ODate, req.user.id]
     );
     const OId = orderResult.insertId;
 
