@@ -89,9 +89,10 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
   console.log("Fetching order with ID:", orderId); // 👈 Log the orderId
 
   const orderQuery = `
-    SELECT o.*, c.* 
+    SELECT o.*, c.*, p.PTAX
     FROM orders o 
     JOIN customer c ON o.CID = c.CID 
+    JOIN province p ON c.CPROVINCE = p.PNAME
     WHERE o.OID = ?`;
 
   const rowsQuery = `
@@ -130,13 +131,6 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
       return row;
     });
   
-    const months = rows.map(r => r.MONTH);
-    // const regionSelections = months.map(month =>
-    //   regionRows
-    //     .filter(r => r.MONTH === month)
-    //     .map(r => r.REGION)
-    // )
-
     res.json({ order, rows, regionRows });
   } catch (err) {
     console.error(err);
