@@ -134,26 +134,26 @@ router.get("/orders", authenticateToken, async (req, res) => {
 
   console.log("Params:", params); // 👈 Log the parameters
 
-  // try {
-  //   // const [rows] = await db.query(
-  //   //   "SELECT * FROM customer WHERE cisactive = 1 ORDER BY CCOMPANY, CNAME"
-  //   // );
+  try {
+    // const [rows] = await db.query(
+    //   "SELECT * FROM customer WHERE cisactive = 1 ORDER BY CCOMPANY, CNAME"
+    // );
 
-  //   const [rows] = await db.query(query, params);
-  //   console.log("Orders fetched:", results); // 👈 Log the output
-
-  //   res.json(rows);
-
-  // } catch (err) {
-  //   console.error(err);
-  //   res.status(500).json({ error: err.message });
-  // }
-
-  await db.query(query, params, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+    const [rows] = await db.query(query, params);
     console.log("Orders fetched:", results); // 👈 Log the output
-    res.json(results);
-  });
+
+    res.json(rows);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+
+  // await db.query(query, params, (err, results) => {
+  //   if (err) return res.status(500).json({ error: err.message });
+  //   console.log("Orders fetched:", results); // 👈 Log the output
+  //   res.json(results);
+  // });
 });
 
 
