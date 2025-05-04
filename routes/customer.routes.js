@@ -3,6 +3,23 @@ const router = express.Router();
 const db = require("../config/db");
 const { authenticateToken } = require("../middleware/auth.middleware");
 
+// Get customer by ID
+router.get("/customers/:id", authenticateToken, (req, res) => {
+  const { id } = req.params;
+  db.query(
+    `SELECT c.*, p.PTAX 
+     FROM customer c 
+     LEFT JOIN province p ON c.CPROVINCE = p.PNAME 
+     WHERE c.CID = ?`,
+    [id],
+    (err, results) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (results.length === 0) return res.status(404).json({ error: "Customer not found" });
+      res.json(results[0]);
+    }
+  );
+});
+
 // Get all active customers
 router.get("/customers", authenticateToken, async (req, res) => {
   try {
