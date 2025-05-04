@@ -115,7 +115,7 @@ router.put("/orders/:orderId", authenticateToken, async (req, res) => {
 
 // Fetch single order with region selections if MONEY SAVER
 router.get("/orders/:orderId", authenticateToken, (req, res) => {
-  const orderId = req.params.id;
+  const orderId = req.params;
 
   const orderQuery = `
     SELECT o.*, c.* 
