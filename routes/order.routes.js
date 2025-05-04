@@ -118,6 +118,13 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
       regionMap[row.MONTH] = row.REGIONS;
     }
   
+    const regionSelections = regionResult.reduce((acc, row) => {
+      const month = row.MONTH;
+      const regions = row.REGIONS.split(",").map(region => region.trim());
+      acc[month] = regions;
+      return acc;
+    }, {});
+
     const rows = rowResult.map(row => {
       if (row.PRODUCTTYPE === "MONEY SAVER" && row.DELIVERYTYPE === "Delivery") {
         row.DELIVERYTYPE = regionMap[row.MONTH] || "";
@@ -127,13 +134,11 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
   
     console.log("rows with regions:", rows); // 👈 Log the rows with regions
   
-    res.json({ order, rows });
+    res.json({ order, rows, regionSelections });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
-
-  
 });
 
 router.get("/orders", authenticateToken, async (req, res) => {
