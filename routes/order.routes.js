@@ -140,7 +140,7 @@ router.get("/orders", authenticateToken, async (req, res) => {
     // );
 
     const [rows] = await db.query(query, params);
-    console.log("Orders fetched:", results); // 👈 Log the output
+    console.log("Orders fetched:", rows); // 👈 Log the output
 
     res.json(rows);
 
