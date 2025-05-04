@@ -119,8 +119,8 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
     }
   
     const rows = rowResult.map(row => {
-      if (row.PRODUCTTYPE === "MONEY SAVER" && row.DELIVERYTYPE === "Print Only") {
-        row.DELIVERYTYPE = regionMap[row.MONTH] || "";
+      if (row.PRODUCTTYPE === "MONEY SAVER" && row.DELIVERYTYPE === "Delivery") {
+        row.DELIVERYTYPE = ("Delivery: " + regionMap[row.MONTH]) || "";
       }
       return row;
     });
