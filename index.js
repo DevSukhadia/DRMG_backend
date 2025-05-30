@@ -9,6 +9,7 @@ const orderRoutes = require("./routes/order.routes");
 const customerRoutes = require("./routes/customer.routes");
 const provinceRoutes = require("./routes/province.routes");
 const regionRoutes = require("./routes/regions.routes");
+const orderSummaryRoutes = require("./routes/orderSummary.routes");
 
 dotenv.config();
 const app = express();
@@ -21,6 +22,7 @@ app.use("/api", orderRoutes);
 app.use("/api", customerRoutes);   
 app.use("/api", provinceRoutes);
 app.use("/api", regionRoutes);
+app.use("/api", orderSummaryRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
