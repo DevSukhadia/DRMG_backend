@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
@@ -10,6 +11,7 @@ const customerRoutes = require("./routes/customer.routes");
 const provinceRoutes = require("./routes/province.routes");
 const regionRoutes = require("./routes/regions.routes");
 const orderSummaryRoutes = require("./routes/orderSummary.routes");
+const emailRoutes = require("./routes/email.routes");
 
 dotenv.config();
 const app = express();
@@ -23,6 +25,7 @@ app.use("/api", customerRoutes);
 app.use("/api", provinceRoutes);
 app.use("/api", regionRoutes);
 app.use("/api", orderSummaryRoutes);
+app.use("/api", emailRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
