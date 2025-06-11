@@ -12,6 +12,7 @@ const provinceRoutes = require("./routes/province.routes");
 const regionRoutes = require("./routes/regions.routes");
 const orderSummaryRoutes = require("./routes/orderSummary.routes");
 const emailRoutes = require("./routes/email.routes");
+const insightRoutes = require("./routes/orderInsight.routes");
 
 dotenv.config();
 const app = express();
@@ -26,6 +27,7 @@ app.use("/api", provinceRoutes);
 app.use("/api", regionRoutes);
 app.use("/api", orderSummaryRoutes);
 app.use("/api", emailRoutes);
+app.use("/api", insightRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
