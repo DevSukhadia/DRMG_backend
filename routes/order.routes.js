@@ -267,11 +267,11 @@ router.put("/orders/:orderId", authenticateToken, async (req, res) => {
       });
     });
 
-    await db.query("DELETE FROM ORDER_REGIONS WHERE OID = ?", [OId]);
+    await db.query("DELETE FROM order_regions WHERE OID = ?", [OId]);
 
     if (orderRegionsData.length > 0) {
       await db.query(
-        `INSERT INTO ORDER_REGIONS (OID, MONTH, REGION) VALUES ?`,
+        `INSERT INTO order_regions (OID, MONTH, REGION) VALUES ?`,
         [orderRegionsData]
       );
     }
@@ -299,11 +299,11 @@ router.get("/orders/:orderId", authenticateToken, async (req, res) => {
 
   const regionsQuery = `
     SELECT r.MONTH, GROUP_CONCAT(r.REGION) AS REGIONS
-    FROM ORDER_REGIONS r 
+    FROM order_regions r 
     WHERE r.OID = ? 
     GROUP BY r.MONTH`;
 
-  const regionRowsQuery = `SELECT MONTH, REGION FROM ORDER_REGIONS WHERE OID = ?`;
+  const regionRowsQuery = `SELECT MONTH, REGION FROM order_regions WHERE OID = ?`;
 
   try {
     const [order] = await db.query(orderQuery, [orderId]);
